@@ -75,5 +75,11 @@ def deleteItem(
     return {"ok": True}
 
 
+@app.post("/op/", response_model=PublicOperacaoEStoque)
 def create_operacao(operacao: CreateOperacaoEstoque, session:SessionDep):
     db_op = OperacaoEStoque.model_validate(operacao)
+    session.add(db_op)
+    session.commit()
+    session.refresh(db_op)
+    return db_op
+
