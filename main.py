@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
 from typing import Annotated, Sequence
 from fastapi import FastAPI, HTTPException, Query
+from sqlalchemy.orm import session
+from sqlalchemy.sql.operators import op
 from sqlmodel import select
 from db import  create_db_and_table, SessionDep
 from models import Item, ItemCreate, ItemPublic, ItemUpdate, BaseOperacaoEstoque, OperacaoEStoque, CreateOperacaoEstoque, PublicOperacaoEStoque
@@ -28,7 +30,7 @@ async def create_item(item: ItemCreate, session: SessionDep) -> Item:
 
 
 @app.get("/itens/", response_model=Sequence[ItemPublic])
-async def get_itens(
+def get_itens(
     session: SessionDep,
     offset: int = 0,
     limit: Annotated[int, Query(le=100)] = 100
@@ -76,10 +78,41 @@ def deleteItem(
 
 
 @app.post("/op/", response_model=PublicOperacaoEStoque)
-def create_operacao(operacao: CreateOperacaoEstoque, session:SessionDep):
+def create_operacao(operacao: CreateOperacaoEstoque, session:SessionDep) -> OperacaoEStoque:
     db_op = OperacaoEStoque.model_validate(operacao)
+
+    item_operado = session.get(Item, db_op.item_id)
+
+    if not item_operado:
+        raise HTTPException(status_code=404, detail="item_id invalid")
+    
     session.add(db_op)
     session.commit()
     session.refresh(db_op)
     return db_op
+
+@app.get("/op/", response_model=Sequence[PublicOperacaoEStoque])
+async def get_all_op(
+    session: SessionDep,
+    offset: int = 0,
+    limit: Annotated[int, Query(le=100)] = 100
+    ) -> Sequence[OperacaoEStoque]:
+    Operacoes = session.exec(select(OperacaoEStoque).offset(offset).limit(limit)).all()
+    return Operacoes
+
+@app.get("/op/{op_id}", response_model=PublicOperacaoEStoque)
+def get_by_id_operacao(
+    op_id:int, session:SessionDep
+    ) -> OperacaoEStoque:
+    op = session.get(OperacaoEStoque, op_id)
+    if not op:
+        raise HTTPException(status_code=404, detail="operacao not found")
+    return op
+
+@app.get("/op/item/{item_id}", response_model=Sequence[PublicOperacaoEStoque])
+def get_all_operacao_by_item_id(
+    session:SessionDep, item_id:int
+    ) -> Sequence[OperacaoEStoque]:
+    operacoes = session.exec(select(OperacaoEStoque).where(OperacaoEStoque.item_id == item_id)).all()
+    return operacoes
 
