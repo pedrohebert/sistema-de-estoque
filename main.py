@@ -2,7 +2,8 @@ from contextlib import asynccontextmanager
 from typing import Annotated, Sequence
 from fastapi import FastAPI, HTTPException, Query
 from sqlmodel import select
-from db import Item, ItemCreate, ItemPublic, ItemUpdate, create_db_and_table, SessionDep
+from db import  create_db_and_table, SessionDep
+from models import Item, ItemCreate, ItemPublic, ItemUpdate, BaseOperacaoEstoque, OperacaoEStoque, CreateOperacaoEstoque, PublicOperacaoEStoque
 
 
 # fim da criação do banco de dados 
@@ -74,3 +75,5 @@ def deleteItem(
     return {"ok": True}
 
 
+def create_operacao(operacao: CreateOperacaoEstoque, session:SessionDep):
+    db_op = OperacaoEStoque.model_validate(operacao)

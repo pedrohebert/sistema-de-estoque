@@ -4,22 +4,6 @@ from fastapi import Depends
 
 
 
-class ItemBese(SQLModel):
-    nome: str = Field(index=True)
-    unidade_medida: str = Field(index=True)
-
-class Item(ItemBese, table=True):
-    id:int | None = Field(default=None, primary_key=True)
-
-class ItemCreate(ItemBese):
-    pass
-
-class ItemPublic(ItemBese):
-    id:int
-
-class ItemUpdate(SQLModel):
-    nome: str | None = None
-    unidade_medida:str | None = None
 
 
 SQL_DATABE_FILENAME = "databese.db"
