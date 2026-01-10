@@ -89,6 +89,13 @@ def create_operacao(operacao: CreateOperacaoEstoque, session:SessionDep) -> Oper
     if not item_operado:
         raise HTTPException(status_code=404, detail="item_id invalid")
     
+    if db_op.tipo == TipoOperacao.RETIRAR:
+        estoque =  get_estoque_item(session, db_op.item_id)
+        if not estoque:
+            raise HTTPException(status_code=404, detail="operacao invalid")
+        if estoque < db_op.quantidade:
+            raise HTTPException(status_code=404, detail="operacao invalid")
+
     session.add(db_op)
     session.commit()
     session.refresh(db_op)
