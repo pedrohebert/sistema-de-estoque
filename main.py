@@ -1,11 +1,10 @@
 from contextlib import asynccontextmanager
 from typing import Annotated, Sequence
 from fastapi import FastAPI, HTTPException, Query
-from sqlalchemy.orm import session
-from sqlalchemy.sql.operators import op
-from sqlmodel import select
+from sqlmodel import func, select, case
+from sqlalchemy.exc import IntegrityError
 from db import  create_db_and_table, SessionDep
-from models import Item, ItemCreate, ItemPublic, ItemUpdate, BaseOperacaoEstoque, OperacaoEStoque, CreateOperacaoEstoque, PublicOperacaoEStoque
+from models import Item, ItemCreate, ItemPublic, ItemUpdate, BaseOperacaoEstoque, OperacaoEStoque, CreateOperacaoEstoque, PublicOperacaoEStoque, TipoOperacao
 
 
 # fim da criação do banco de dados 
@@ -23,9 +22,13 @@ app = FastAPI(lifespan=lifespan)
 @app.post("/item/", response_model=ItemPublic)
 async def create_item(item: ItemCreate, session: SessionDep) -> Item:
     db_item = Item.model_validate(item)
-    session.add(db_item)
-    session.commit()
-    session.refresh(db_item)
+    try:
+        session.add(db_item)
+        session.commit()
+        session.refresh(db_item)
+    except(IntegrityError):
+        raise HTTPException(status_code=400, detail="item already exists")
+    
     return db_item
 
 
@@ -79,10 +82,10 @@ def deleteItem(
 
 @app.post("/op/", response_model=PublicOperacaoEStoque)
 def create_operacao(operacao: CreateOperacaoEstoque, session:SessionDep) -> OperacaoEStoque:
+
     db_op = OperacaoEStoque.model_validate(operacao)
 
     item_operado = session.get(Item, db_op.item_id)
-
     if not item_operado:
         raise HTTPException(status_code=404, detail="item_id invalid")
     
@@ -115,4 +118,23 @@ def get_all_operacao_by_item_id(
     ) -> Sequence[OperacaoEStoque]:
     operacoes = session.exec(select(OperacaoEStoque).where(OperacaoEStoque.item_id == item_id)).all()
     return operacoes
+
+@app.get("/item/{item_id}/estoque")
+def get_estoque_item(
+    session: SessionDep,
+    item_id: int
+    ) -> int | None:
+    soma = func.sum(
+        case(
+            (OperacaoEStoque.tipo == TipoOperacao.ADICIONAR, OperacaoEStoque.quantidade),
+            (OperacaoEStoque.tipo == TipoOperacao.RETIRAR, -OperacaoEStoque.quantidade),
+            else_=0
+        )
+    )
+
+    res = session.exec(
+            select(soma).where(OperacaoEStoque.item_id == item_id)
+    ).one()
+
+    return res 
 
