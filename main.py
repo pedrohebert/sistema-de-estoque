@@ -87,14 +87,13 @@ def create_operacao(operacao: CreateOperacaoEstoque, session:SessionDep) -> Oper
 
     item_operado = session.get(Item, db_op.item_id)
     if not item_operado:
-        raise HTTPException(status_code=404, detail="item_id invalid")
+        raise HTTPException(status_code=400, detail="item_id invalid")
     
     if db_op.tipo == TipoOperacao.RETIRAR:
         estoque =  get_estoque_item(session, db_op.item_id)
-        if not estoque:
-            raise HTTPException(status_code=404, detail="operacao invalid")
+
         if estoque < db_op.quantidade:
-            raise HTTPException(status_code=404, detail="operacao invalid")
+            raise HTTPException(status_code=400, detail="operacao invalid")
 
     session.add(db_op)
     session.commit()
@@ -102,7 +101,7 @@ def create_operacao(operacao: CreateOperacaoEstoque, session:SessionDep) -> Oper
     return db_op
 
 @app.get("/op/", response_model=Sequence[PublicOperacaoEStoque])
-async def get_all_op(
+def get_all_op(
     session: SessionDep,
     offset: int = 0,
     limit: Annotated[int, Query(le=100)] = 100
@@ -130,13 +129,16 @@ def get_all_operacao_by_item_id(
 def get_estoque_item(
     session: SessionDep,
     item_id: int
-    ) -> int | None:
-    soma = func.sum(
-        case(
-            (OperacaoEStoque.tipo == TipoOperacao.ADICIONAR, OperacaoEStoque.quantidade),
-            (OperacaoEStoque.tipo == TipoOperacao.RETIRAR, -OperacaoEStoque.quantidade),
-            else_=0
-        )
+    ) -> int:
+    soma = func.coalesce( 
+        func.sum(
+            case(
+                (OperacaoEStoque.tipo == TipoOperacao.ADICIONAR, OperacaoEStoque.quantidade),
+                (OperacaoEStoque.tipo == TipoOperacao.RETIRAR, -OperacaoEStoque.quantidade),
+                else_=0
+            )
+        ),
+        0
     )
 
     res = session.exec(
