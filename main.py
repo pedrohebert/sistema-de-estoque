@@ -1,11 +1,12 @@
 from contextlib import asynccontextmanager
 from typing import Annotated, Sequence
 from fastapi import FastAPI, Query
+from starlette.responses import FileResponse
 from db import  create_db_and_table, SessionDep
 from models import Item, ItemCreate, ItemPublic, ItemUpdate, OperacaoEStoque, CreateOperacaoEstoque, PublicOperacaoEStoque
 from services.ItemSevices import CreateItem, DeleteItem, GetItens, GetItensById, UpdateItem
 from services.OperacaoSevice import CreateOperacao, GetAllOperacao, GetAllOperacaoByItemId, GetByIdOperacao, GetEstoqueItem
-
+from fastapi.middleware.cors import CORSMiddleware
 
 # fim da criação do banco de dados 
 
@@ -17,7 +18,18 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],   # em produção, restrinja
+    allow_credentials=True,
+    allow_methods=["*"],   # permite POST, PATCH, DELETE, OPTIONS
+    allow_headers=["*"],   # permite Content-Type
+)
 
+
+@app.get("/")
+async def root() -> FileResponse:
+    return FileResponse("html/index.html")
 
 @app.post("/item/", response_model=ItemPublic)
 def create_item(session: SessionDep, item: ItemCreate ) -> Item:

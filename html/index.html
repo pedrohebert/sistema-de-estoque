@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Almoxarifado</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+#lista-itens {
+  list-style: none;
+  padding: 0;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.controls input {
+  width: 60px;
+  text-align: center;
+}
+
+.controls button {
+  padding: 4px 8px;
+  cursor: pointer;
+}
+</style>
+
+</head>
+<body class="bg-gray-100 p-6">
+  <h1 class="text-2xl font-bold mb-4">📦 Sistema de Almoxarifado</h1>
+
+  <!-- Criar Item -->
+  <section class="bg-white p-4 rounded shadow mb-6">
+    <h2 class="font-semibold mb-2">Criar Item</h2>
+    <input id="item-nome" class="border p-2 mr-2" placeholder="Nome" />
+    <select id="item-unidade" class="border p-2 mr-2">
+      <option value="UNIDADE">selecione</option>
+      <option value="UNIDADE">Unidade</option>
+      <option value="CAIXA">Caixa</option>
+      <option value="LITRO">Litro</option>
+    </select>
+    <button onclick="criarItem()" class="bg-blue-600 text-white px-4 py-2 rounded">Criar</button>
+  </section>
+
+  <!-- Lista de Itens -->
+  <section class="bg-white p-4 rounded shadow mb-6">
+    <h2 class="font-semibold mb-2">Itens</h2>
+    <button onclick="carregarItens()" class="bg-green-600 text-white px-4 py-2 rounded mb-2">Atualizar</button>
+    <ul id="lista-itens" class="list-disc pl-5"></ul>
+  </section>
+
+
+
+<script>
+const API = "http://localhost:8000";
+
+async function criarItem() {
+  const nome = document.getElementById('item-nome').value;
+  const unidade = document.getElementById('item-unidade').value;
+
+  const res = await fetch(`${API}/item/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nome, unidade_medida: unidade })
+  });
+
+  alert(res.ok ? 'Item criado' : 'Erro ao criar item');
+  carregarItens();
+}
+
+
+async function carregarItens() {
+  const res = await fetch(`${API}/itens/`);
+  const itens = await res.json();
+
+  const ul = document.getElementById('lista-itens');
+  ul.innerHTML = '';
+
+  const itensComEstoque = await Promise.all(
+    itens.map(async (i) => {
+      const resEstoque = await fetch(`${API}/item/${i.id}/estoque`);
+      const estoque = await resEstoque.json();
+      return { ...i, estoque };
+    })
+  );
+
+  itensComEstoque.forEach(i => {
+    const li = document.createElement('li');
+    li.className = "item";
+
+    li.innerHTML = `
+      <span>
+        #${i.id} - <strong>${i.nome}</strong> (${i.unidade_medida})
+        - Estoque: <strong>${i.estoque}</strong>
+      </span>
+
+      <div class="controls">
+        <button onclick="alterarValor(${i.id}, -1)">−</button>
+        <input 
+          type="number" 
+          id="qtd-${i.id}" 
+          value="0" 
+        />
+        <button onclick="alterarValor(${i.id}, 1)">+</button>
+        <button onclick="enviarOperacao(${i.id})">Enviar</button>
+      </div>
+    `;
+
+    ul.appendChild(li);
+  });
+}
+
+function alterarValor(itemId, delta) {
+  const input = document.getElementById(`qtd-${itemId}`);
+  const novoValor = Number(input.value) + Number(delta);
+  input.value = novoValor;
+}
+
+async function enviarOperacao(itemId) {
+  const input = document.getElementById(`qtd-${itemId}`);
+  const quantidade = Number(input.value);
+  const tipo = quantidade >= 0 ? "ADICIONAR" : "RETIRAR"
+
+  if (quantidade == 0) {
+    return;
+  }
+
+  const res = await fetch(`${API}/op/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      item_id: itemId,
+      tipo: tipo,
+      quantidade: Math.abs(quantidade),
+      data_hora: new Date().toISOString()
+})
+});
+
+  if (!res.ok) {
+    alert("Erro ao registrar operação");
+    return;
+  }
+
+  await carregarItens();
+}
+
+</script>
+</body>
+</html>
