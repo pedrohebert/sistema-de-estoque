@@ -1,0 +1,8 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app/app
+    command: uvicorn app.main:app --reload --host 0.0.0.0

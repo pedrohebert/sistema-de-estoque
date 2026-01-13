@@ -2,8 +2,8 @@ from typing import Annotated, Sequence
 from fastapi import HTTPException, Query
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
-from db import SessionDep
-from models import Item, ItemCreate, ItemUpdate
+from app.db import SessionDep
+from app.models import Item, ItemCreate, ItemUpdate
 
 
 def CreateItem(session: SessionDep, item: ItemCreate) -> Item:
