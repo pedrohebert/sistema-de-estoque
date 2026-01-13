@@ -44,7 +44,7 @@
     <h2 class="font-semibold mb-2">Criar Item</h2>
     <input id="item-nome" class="border p-2 mr-2" placeholder="Nome" />
     <select id="item-unidade" class="border p-2 mr-2">
-      <option value="UNIDADE">selecione</option>
+      <option value="">selecione</option>
       <option value="UNIDADE">Unidade</option>
       <option value="CAIXA">Caixa</option>
       <option value="LITRO">Litro</option>
@@ -154,6 +154,7 @@ async function enviarOperacao(itemId) {
   await carregarItens();
 }
 
+document.addEventListener("DOMContentLoaded", carregarItens)
 </script>
 </body>
 </html>
