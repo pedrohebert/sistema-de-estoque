@@ -11,10 +11,7 @@ import os
 SQL_DATABASE_URL = os.getenv("DATABASE_URL")
 assert SQL_DATABASE_URL != None, "url do banco de dados não definida"
 
-print(SQL_DATABASE_URL)
-
-connect_args = {"check_same_thread": False}
-engine = create_engine(SQL_DATABASE_URL, connect_args=connect_args, echo=True)
+engine = create_engine(SQL_DATABASE_URL, echo=True)
 
 def create_db_and_table():
     SQLModel.metadata.create_all(engine)
