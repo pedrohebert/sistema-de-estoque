@@ -1,13 +1,17 @@
 from sqlmodel import SQLModel, Session, create_engine
 from typing import Annotated
 from fastapi import Depends
+import os
 
 
 
 
+#SQL_DATABE_FILENAME = "databese.db"
+#SQL_DATABASE_URL = f"sqlite:///{SQL_DATABE_FILENAME}"
+SQL_DATABASE_URL = os.getenv("DATABASE_URL")
+assert SQL_DATABASE_URL != None, "url do banco de dados não definida"
 
-SQL_DATABE_FILENAME = "databese.db"
-SQL_DATABASE_URL = f"sqlite:///{SQL_DATABE_FILENAME}"
+print(SQL_DATABASE_URL)
 
 connect_args = {"check_same_thread": False}
 engine = create_engine(SQL_DATABASE_URL, connect_args=connect_args, echo=True)
