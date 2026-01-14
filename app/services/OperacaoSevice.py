@@ -1,8 +1,8 @@
 from typing import Annotated, Sequence
 from fastapi import HTTPException, Query
 from sqlmodel import func, select, case
-from app.db import SessionDep
-from app.models import CreateOperacaoEstoque, Item, OperacaoEStoque, TipoOperacao
+from app.db.db import SessionDep
+from app.models.models import CreateOperacaoEstoque, Item, OperacaoEStoque, TipoOperacao
 
 
 def CreateOperacao(session:SessionDep, operacao: CreateOperacaoEstoque ) -> OperacaoEStoque:
