@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from app.db.db import  create_db_and_table
 from app.routes.routes import routes
+from app.routes.AsyncRoutes import asyncRoute
 from fastapi.middleware.cors import CORSMiddleware
 
 # fim da criação do banco de dados 
@@ -24,7 +25,7 @@ app.add_middleware(
     allow_headers=["*"],   # permite Content-Type
 )
 
-app.include_router(router=routes)
+app.include_router(router=asyncRoute)
 
 
 @app.get("/")

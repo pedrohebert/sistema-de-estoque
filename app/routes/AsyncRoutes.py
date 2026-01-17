@@ -2,7 +2,7 @@ from typing import Annotated, Sequence
 from fastapi import APIRouter, Query
 from app.models.models import Item, ItemCreate, ItemPublic, ItemUpdate, OperacaoEStoque, CreateOperacaoEstoque, PublicOperacaoEStoque
 from app.services.asyncio.itemServices import CreateItem, DeleteItem, GetItens, GetItemById, UpdateItem
-from app.services.asyncio.operacaoSevices import CreateOperacao, GetAllOperacao, GetAllOperacaoByItemId, GetEstoqueItem, GetByIdOperacao
+from app.services.asyncio.operacaoServices import CreateOperacao, GetAllOperacao, GetAllOperacaoByItemId, GetEstoqueItem, GetByIdOperacao
 from app.db.db_async import asyncSessionDep
 
 asyncRoute = APIRouter()

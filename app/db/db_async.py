@@ -1,6 +1,6 @@
 from typing import Annotated, AsyncGenerator
 from fastapi import Depends
-from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
 import os
 from sqlmodel import SQLModel
@@ -8,10 +8,19 @@ from sqlmodel import SQLModel
 DATABASE_URL = os.getenv("DATABASE_URL")
 assert DATABASE_URL is not None
 
-async_engine = create_async_engine(DATABASE_URL, echo=True, future=True)
+async_engine = create_async_engine(
+    DATABASE_URL, 
+    echo=True
+    )
+
+asyncSessionLocal = async_sessionmaker(
+    async_engine,
+    class_=AsyncSession,
+    expire_on_commit=True
+)
 
 async def get_session_async() -> AsyncGenerator[AsyncSession, None]:
-    async with AsyncSession() as session:
+    async with asyncSessionLocal() as session:
         yield session
 
 async def init_db():
