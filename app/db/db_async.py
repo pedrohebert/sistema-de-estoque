@@ -19,4 +19,4 @@ async def init_db():
         await conn.run_sync(SQLModel.metadata.create_all)
 
 
-asyncSessionDeb = Annotated[AsyncSession, Depends(get_session_async)]
+asyncSessionDep = Annotated[AsyncSession, Depends(get_session_async)]

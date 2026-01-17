@@ -2,13 +2,13 @@ from re import I
 from typing import Annotated, Sequence
 
 from fastapi import HTTPException, Query
-from app.db.db_async import asyncSessionDeb
+from app.db.db_async import asyncSessionDep
 from app.models.models import Item, ItemCreate, ItemUpdate
 from sqlmodel import select
 
 
 async def GetItens(
-    session: asyncSessionDeb, 
+    session: asyncSessionDep, 
     offset:int = 0, 
     limit: Annotated[int, Query(le=100)] = 100
     ) -> Sequence[Item]:
@@ -17,7 +17,7 @@ async def GetItens(
     return itens.all()
 
 async def CreateItem(
-    session: asyncSessionDeb, 
+    session: asyncSessionDep, 
     item: ItemCreate
     ) -> Item:
     db_item = Item.model_validate(item)
@@ -28,7 +28,7 @@ async def CreateItem(
     return db_item
 
 async def GetItemById(
-    session: asyncSessionDeb,
+    session: asyncSessionDep,
     item_id: int
     ) -> Item:
     item = await session.get(Item, item_id)
@@ -37,7 +37,7 @@ async def GetItemById(
     return item
 
 async def UpdateItem(
-    session: asyncSessionDeb,
+    session: asyncSessionDep,
     update_item: ItemUpdate,
     item_id: int
     ) -> Item:
@@ -52,7 +52,7 @@ async def UpdateItem(
     return item_db
 
 async def DeleteItem(
-    session: asyncSessionDeb,
+    session: asyncSessionDep,
     item_id: int
     ) -> dict[str, bool]:
     item_db = await session.get(Item, item_id)
