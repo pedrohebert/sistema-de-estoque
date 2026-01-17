@@ -29,7 +29,7 @@ def GetItens(
     ).all()
     return itens
 
-def GetItensById(
+def GetItemById(
     session:SessionDep,
     item_id: int
     ) -> Item:

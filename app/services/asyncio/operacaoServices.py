@@ -55,6 +55,14 @@ async def GetAllOperacaoByItemId(
         )
     return operacoes.all()
 
+async def GetByIdOperacao(
+    session:asyncSessionDep, op_id:int
+    ) -> OperacaoEStoque:
+    op = await session.get(OperacaoEStoque, op_id)
+    if not op:
+        raise HTTPException(status_code=404, detail="operacao not found")
+    return op
+
 async def GetEstoqueItem(
     session: asyncSessionDep,
     item_id: int
