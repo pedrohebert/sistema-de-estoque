@@ -1,11 +1,8 @@
 from contextlib import asynccontextmanager
-from typing import Annotated, Sequence
-from fastapi import FastAPI, Query
-from starlette.responses import FileResponse
-from app.db.db import  create_db_and_table, SessionDep
-from app.models.models import Item, ItemCreate, ItemPublic, ItemUpdate, OperacaoEStoque, CreateOperacaoEstoque, PublicOperacaoEStoque
-from app.services.ItemSevices import CreateItem, DeleteItem, GetItens, GetItensById, UpdateItem
-from app.services.OperacaoSevice import CreateOperacao, GetAllOperacao, GetAllOperacaoByItemId, GetByIdOperacao, GetEstoqueItem
+from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from app.db.db import  create_db_and_table
+from app.routes.routes import routes
 from fastapi.middleware.cors import CORSMiddleware
 
 # fim da criação do banco de dados 
@@ -27,11 +24,14 @@ app.add_middleware(
     allow_headers=["*"],   # permite Content-Type
 )
 
+app.include_router(router=routes)
+
 
 @app.get("/")
 async def root() -> FileResponse:
     return FileResponse("app/html/index.html")
 
+"""
 @app.post("/item/", response_model=ItemPublic)
 def create_item(session: SessionDep, item: ItemCreate ) -> Item:
     return CreateItem(session, item)
@@ -100,3 +100,4 @@ def get_estoque_item(
     ) -> int:
     return GetEstoqueItem(session, item_id)
 
+"""
