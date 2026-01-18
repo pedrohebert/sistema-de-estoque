@@ -1,6 +1,4 @@
-from re import I
 from typing import Annotated, Sequence
-
 from fastapi import HTTPException, Query
 from app.db.db_async import asyncSessionDep
 from app.models.models import Item, ItemCreate, ItemUpdate
