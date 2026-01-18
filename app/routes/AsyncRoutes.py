@@ -76,3 +76,7 @@ async def get_estoque_item(
     ) -> int:
     return await GetEstoqueItem(session, item_id)
 
+
+@asyncRoute.get("/ping")
+async def pong():
+    return {"pong":True}

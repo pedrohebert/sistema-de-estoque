@@ -74,3 +74,7 @@ def get_estoque_item(
     item_id: int
     ) -> int:
     return GetEstoqueItem(session, item_id)
+
+@routes.get("/ping")
+def pong():
+    return {"pong":True}
