@@ -1,4 +1,4 @@
-from sqlmodel import SQLModel, Session, create_engine
+from sqlmodel import SQLModel, Session, create_engine, false
 from typing import Annotated
 from fastapi import Depends
 import os
@@ -11,7 +11,9 @@ import os
 SQL_DATABASE_URL = os.getenv("DATABASE_URL")
 assert SQL_DATABASE_URL != None, "url do banco de dados não definida"
 
-engine = create_engine(SQL_DATABASE_URL, echo=True)
+ECHO_DB:bool = True if os.getenv("ECHO_DB") == 'True' else False
+
+engine = create_engine(SQL_DATABASE_URL, echo=ECHO_DB)
 
 def create_db_and_table():
     SQLModel.metadata.create_all(engine)

@@ -8,9 +8,13 @@ from sqlmodel import SQLModel
 DATABASE_URL = os.getenv("DATABASE_URL")
 assert DATABASE_URL is not None
 
+ECHO_DB: bool = True if os.getenv("ECHO_DB") == 'True' else False
+
 async_engine = create_async_engine(
     DATABASE_URL, 
-    echo=True
+    echo=ECHO_DB,
+    pool_size=20,
+    max_overflow=10
     )
 
 asyncSessionLocal = async_sessionmaker(
