@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi.responses import HTMLResponse
 from app.db.db import  create_db_and_table
 from app.routes.routes import routes
 from app.routes.AsyncRoutes import asyncRoute
@@ -29,8 +29,8 @@ app.include_router(router=asyncRoute)
 
 
 @app.get("/")
-async def root() -> FileResponse:
-    return FileResponse("app/html/index.html")
+async def root() -> HTMLResponse:
+    return HTMLResponse("app/html/index.html")
 
 """
 @app.post("/item/", response_model=ItemPublic)
