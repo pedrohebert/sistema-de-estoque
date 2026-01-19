@@ -13,7 +13,7 @@ ECHO_DB: bool = True if os.getenv("ECHO_DB") == 'True' else False
 async_engine = create_async_engine(
     DATABASE_URL, 
     echo=ECHO_DB,
-    pool_size=20,
+    pool_size=30,
     max_overflow=10
     )
 
