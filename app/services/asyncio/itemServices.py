@@ -1,5 +1,6 @@
 from typing import Annotated, Sequence
 from fastapi import HTTPException, Query
+from fastapi.responses import HTMLResponse
 from app.db.db_async import asyncSessionDep
 from app.models.models import Item, ItemCreate, ItemUpdate
 from sqlmodel import select
@@ -58,3 +59,7 @@ async def DeleteItem(
         raise HTTPException(status_code=404, detail="itens not fould")
     await session.delete(item_db)
     return {"ok": True}
+
+
+async def itemPage():
+    return HTMLResponse("app/html/.html")
