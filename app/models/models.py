@@ -14,6 +14,7 @@ class ItemBese(SQLModel):
 
 class Item(ItemBese, table=True):
     id:int | None = Field(default=None, primary_key=True)
+    ativo:bool = Field(default=True)
 
 class ItemCreate(ItemBese):
     pass

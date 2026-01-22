@@ -17,10 +17,11 @@ async def create_item(session: asyncSessionDep, item: ItemCreate ) -> Item:
 @asyncRoute.get("/itens/", response_model=Sequence[ItemPublic])
 async def get_itens(
     session: asyncSessionDep,
+    include_deactives: bool = False,
     offset: int = 0,
     limit: Annotated[int, Query(le=100)] = 100
     ) -> Sequence[Item]:
-    return await GetItens(session, offset, limit)
+    return await GetItens(session, include_deactives, offset, limit)
 
 @asyncRoute.get("/itens/{item_id}", response_model=ItemPublic)
 async def get_itens_by_id(

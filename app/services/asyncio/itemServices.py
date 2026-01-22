@@ -1,17 +1,24 @@
+from re import I
 from typing import Annotated, Sequence
 from fastapi import HTTPException, Query
 from app.db.db_async import asyncSessionDep
 from app.models.models import Item, ItemCreate, ItemUpdate
-from sqlmodel import select
+from sqlmodel import false, select
 
 
 async def GetItens(
     session: asyncSessionDep, 
+    include_deactives: bool = False,
     offset:int = 0, 
     limit: Annotated[int, Query(le=100)] = 100
     ) -> Sequence[Item]:
 
-    itens = await session.exec(select(Item).offset(offset).limit(limit))
+    comand = select(Item).offset(offset).limit(limit).where(Item.ativo == True)
+    if include_deactives:
+        comand = select(Item).offset(offset).limit(limit)
+    
+    itens = await session.exec(comand)
+        
     return itens.all()
 
 async def CreateItem(
@@ -54,9 +61,12 @@ async def DeleteItem(
     item_id: int
     ) -> dict[str, bool]:
     item_db = await session.get(Item, item_id)
-    if not item_db:
+    if not item_db or item_db.ativo == False:
         raise HTTPException(status_code=404, detail="itens not fould")
-    await session.delete(item_db)
+    item_db.ativo = False
+    session.add(item_db)
+    await session.commit()
+    await session.refresh(item_db)
     return {"ok": True}
 
 
