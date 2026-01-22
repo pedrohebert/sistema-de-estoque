@@ -97,11 +97,11 @@ async function carregarItens() {
   itensComEstoque.forEach(i => {
     const li = document.createElement('li');
     li.className = "item";
-
+    li.id = `item-${i.id}`
     li.innerHTML = `
       <span>
         #${i.id} - <strong>${i.nome}</strong> (${i.unidade_medida})
-        - Estoque: <strong>${i.estoque}</strong>
+        - Estoque: <strong id="itemEstoque-${i.id}">${i.estoque}</strong>
       </span>
 
       <div class="controls">
@@ -151,7 +151,15 @@ async function enviarOperacao(itemId) {
     return;
   }
 
-  await carregarItens();
+  await recarrecarItem(itemId);
+}
+
+async function recarrecarItem(itemId) {
+  const estoque = await fetch(`${API}item/${itemId}/estoque`)
+   
+  const strongEstoque = document.getElementById(`itemEstoque-${itemId}`)
+  
+  strongEstoque.innerText = await estoque.json()
 }
 
 document.addEventListener("DOMContentLoaded", carregarItens)
