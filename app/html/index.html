@@ -96,26 +96,32 @@ async function carregarItens() {
 
   itensComEstoque.forEach(i => {
     const li = document.createElement('li');
-    li.className = "item";
-    li.id = `item-${i.id}`
+    li.className = "item cursor-pointer hover:bg-gray-50";
+    li.id = `item-${i.id}`;
+
+    li.onclick = () => {
+      window.location.href = `/item/${i.id}/page`;
+    };
+
     li.innerHTML = `
       <span>
         #${i.id} - <strong>${i.nome}</strong> (${i.unidade_medida})
         - Estoque: <strong id="itemEstoque-${i.id}">${i.estoque}</strong>
       </span>
 
-      <div class="controls">
+      <div class="controls" onclick="event.stopPropagation()">
         <button onclick="alterarValor(${i.id}, -1)">-</button>
+
         <input 
           type="number" 
           id="qtd-${i.id}" 
           value="0" 
         />
+
         <button onclick="alterarValor(${i.id}, 1)">+</button>
         <button onclick="enviarOperacao(${i.id})">Enviar</button>
       </div>
-    `;
-
+      `;
     ul.appendChild(li);
   });
 }
