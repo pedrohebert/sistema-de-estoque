@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:16
-    container_name: postgres_almox_test
+    container_name: postgres_almox
     restart: always
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -19,7 +19,7 @@ services:
 
   api:
     build: .
-    container_name: fastapi_almox_test
+    container_name: fastapi_almox
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1
     volumes:
       - ./app:/app/app
