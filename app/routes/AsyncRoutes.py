@@ -1,6 +1,6 @@
 from typing import Annotated, Sequence
 from fastapi import APIRouter, Query
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from app.models.models import Item, ItemCreate, ItemPublic, ItemUpdate, OperacaoEStoque, CreateOperacaoEstoque, PublicOperacaoEStoque
 from app.services.asyncio.itemServices import CreateItem, DeleteItem, GetItens, GetItemById, UpdateItem
 from app.services.asyncio.operacaoServices import CreateOperacao, GetAllOperacao, GetAllOperacaoByItemId, GetEstoqueItem, GetByIdOperacao
@@ -76,11 +76,11 @@ async def get_estoque_item(
     item_id: int
     ) -> int:
     return await GetEstoqueItem(session, item_id)
-"""
-@asyncRoute.get("/item/{item_id}/page", response_model=HTMLResponse)
-async def item_page() -> HTMLResponse:
-    return await itemPage()
-"""
+
+@asyncRoute.get("/item/{item_id}/page")
+async def itemPage(item_id: int) -> FileResponse:
+    return FileResponse("app/html/itemPage.html")
+
 @asyncRoute.get("/ping")
 async def pong():
     return {"pong":True}
