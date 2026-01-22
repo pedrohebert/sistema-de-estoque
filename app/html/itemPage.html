@@ -5,34 +5,116 @@
   <title>Item - Almoxarifado</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen p-6">
+<body class="bg-gray-100 min-h-screen p-6" id="body">
 
-  <h1 class="text-2xl font-bold mb-6">📦 Detalhes do Item</h1>
-
-  <section class="bg-white p-6 rounded shadow max-w-md">
-    <div class="mb-4">
-      <span class="text-sm text-gray-500">ID</span>
-      <p class="text-lg font-semibold text-gray-800">123</p>
-    </div>
-
-    <div class="mb-4">
-      <span class="text-sm text-gray-500">Nome</span>
-      <p class="text-lg font-semibold text-gray-800">Parafuso</p>
-    </div>
-
-    <div class="mb-4">
-      <span class="text-sm text-gray-500">Unidade de Medida</span>
-      <p class="text-lg font-semibold text-gray-800">Unidade</p>
-    </div>
-
-    <div class="mt-6">
-      <div class="bg-green-100 border border-green-300 text-green-800 text-center py-3 rounded font-bold">
-        Estoque atual: 250
-      </div>
-    </div>
-  </section>
 <script>
-    
+  const API = window.location.origin;
+  const ITEMID = window.location.pathname.split("/")[2];
+
+  async function enviarQuantidade() {
+    const input = document.getElementById("quantidade");
+    const valor = Number(input.value);
+
+    if (!valor || valor === 0) {
+      alert("Informe uma quantidade válida");
+      return;
+    }
+
+    const payload = {
+      item_id: Number(ITEMID),
+      tipo: valor > 0 ? "ADICIONAR" : "RETIRAR",
+      quantidade: Math.abs(valor),
+      data_hora: new Date().toISOString()
+    };
+
+    await fetch(`${API}/op/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    location.reload();
+  }
+
+  async function deletarItem() {
+    const confirmacao = confirm("Tem certeza que deseja deletar este item?");
+    if (!confirmacao) return;
+
+    await fetch(`${API}/item/${ITEMID}`, {
+      method: "DELETE"
+    });
+
+    window.location.href = "/"; // ou página de lista
+  }
+
+  async function construirPage() {
+    const body = document.getElementById("body");
+
+    const itemFetch = await fetch(`${API}/itens/${ITEMID}`);
+    const estoqueFetch = await fetch(`${API}/item/${ITEMID}/estoque`);
+
+    const jsonItem = await itemFetch.json();
+    const valorEstoque = await estoqueFetch.json();
+
+    body.innerHTML = `
+      <h1 class="text-2xl font-bold mb-6">📦 Detalhes do Item</h1>
+
+      <section class="bg-white p-6 rounded shadow max-w-md space-y-4">
+
+        <div>
+          <span class="text-sm text-gray-500">ID</span>
+          <p class="text-lg font-semibold">${ITEMID}</p>
+        </div>
+
+        <div>
+          <span class="text-sm text-gray-500">Nome</span>
+          <p class="text-lg font-semibold">${jsonItem.nome}</p>
+        </div>
+
+        <div>
+          <span class="text-sm text-gray-500">Unidade de Medida</span>
+          <p class="text-lg font-semibold">${jsonItem.unidade_medida}</p>
+        </div>
+
+        <div class="bg-green-100 border border-green-300 text-green-800 text-center py-3 rounded font-bold">
+          Estoque atual: ${valorEstoque}
+        </div>
+
+        <!-- Controle de estoque -->
+        <div class="pt-4 border-t space-y-2">
+          <input
+            id="quantidade"
+            type="number"
+            class="border p-2 w-full rounded"
+            placeholder="Quantidade (+ entrada / - saída)"
+          />
+
+          <button
+            onclick="enviarQuantidade()"
+            class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          >
+            Enviar
+          </button>
+        </div>
+
+        <!-- Deletar -->
+        <div class="pt-4 border-t">
+          <button
+            onclick="deletarItem()"
+            class="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700"
+          >
+            Deletar Item
+          </button>
+        </div>
+
+      </section>
+    `;
+  }
+
+  document.addEventListener("DOMContentLoaded", construirPage);
 </script>
+
 </body>
 </html>
