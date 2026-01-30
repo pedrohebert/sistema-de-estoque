@@ -43,7 +43,7 @@ git clone https://github.com/seu-usuario/seu-projeto.git
 cd seu-projeto
 ```
 
-crie um arquivo .env na raiz com base no exemplo .env.exmple substituindo os campos com valores validos 
+crie um arquivo .env na raiz com base no exemplo [.env.exemple](./.env.exemple) substituindo os campos com valores validos 
 
 suba os conteiner do projeto com:
 ```bash
